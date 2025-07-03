@@ -19,8 +19,10 @@ def initialize_domain(lx, ly, nx, ny):
     return x, y, X, Y, kx, ky, KX, KY
 
 
-def find_guesses(psi, density_threshold, x, y):
+def find_guesses(psi, density_threshold, x, y, extraMask=None):
     mask=(np.abs(psi)**2<=density_threshold)
+    if extraMask is not None:
+        mask=mask & extraMask
     indices=np.argwhere(mask)
     return np.array([[x[i], y[j]] for i, j in indices])
 
@@ -128,8 +130,18 @@ if __name__ == "__main__":
     print("Density and phase fields before tracking plotted")
 
 
+    # Adding extra radial mask (edit these values if needed!)
+    #R=30.
+    #x0=lx/2.
+    #y0=ly/2.
+    #extraMask=((X-x0)**2+(Y-y0)**2<R**2)
+
+    #print("Extra radial mask added")
+
+
     # Find vortex position guesses
     guesses=find_guesses(psi, density_threshold, x, y)
+    #guesses=find_guesses(psi, density_threshold, x, y, extraMask=extraMask)
 
     print("Vortex position guesses found")
 
@@ -170,7 +182,7 @@ if __name__ == "__main__":
         print("No vortex points were detected")
 
     # Save result
-    data=np.column_stack((vortexPoints[:, 0], vortexPoints[:, 0], pseudovorticity))
+    data=np.column_stack((vortexPoints[:, 0], vortexPoints[:, 1], pseudovorticity))
     fname="detectedVortices.txt"
     np.savetxt(fname, data, delimiter=' ', header='x-coordinate, y-coordinate, pseudovorticity')
     print(fname)
